@@ -5,23 +5,20 @@ import sys
 import random
 
 class Piece:
-
     def __init__(self, row, col, imgorigin):
         self.row = row
         self.col = col
         self.img = imgorigin.copy()
         self.img = imgorigin[:self.row, :self.col]
 
-
-
-    def show(self):
-        cv2.imshow("piece",self.img)
+    def show(self,name):
+        cv2.imshow(name,self.img)
+        cv2.waitKey(0)
 
 
 
 if __name__ == "__main__":
-
-    img = cv2.imread('sample.jpeg', cv2.IMREAD_COLOR)
+    img = cv2.imread("sample.jpeg", cv2.IMREAD_COLOR)
     row, col, channel = img.shape
 
     p = int(sys.argv[1])
@@ -33,17 +30,27 @@ if __name__ == "__main__":
     piece_col = int(col/q)
 
     pieces = [[Piece(piece_row, piece_col,
-                     img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_row+piece_col])
+                     img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
                for j in range(q)]
-              for i in range(q)]
+              for i in range(p)]
 
     #flip pieces
 
 
     #shuffle pieces
+    piece_idx = [i for i in range(p*q)]
+    random.shuffle(piece_idx)
 
+    # Merge to puzzled pieces
+    puzzled_image = np.zeros((row,col, 3), np.uint8)
+    for i in range(p*q):
+        offset_row = piece_row*int(i/q)
+        offset_col = piece_col*int(i%q)
+        puzzled_image[offset_row:offset_row+piece_row, offset_col:offset_col+piece_col] = \
+            pieces[int(piece_idx[i]/q)][piece_idx[i]%q].img
 
-    cv2.imshow("image", pieces[0][0].img)
+    cv2.imwrite("puzzled_image.jpg",puzzled_image)
+    cv2.imshow("image", puzzled_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
