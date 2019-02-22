@@ -3,22 +3,7 @@ import cv2
 import numpy as np
 import sys
 import random
-
-class Piece:
-    def __init__(self, row, col, imgorigin):
-        self.row = row
-        self.col = col
-        self.img = imgorigin.copy()
-        self.img = imgorigin[:self.row, :self.col]
-
-    def show(self,name):
-        cv2.imshow(name,self.img)
-        cv2.waitKey(0)
-
-    def flip(self, flip_flag):
-        if flip_flag != 2:
-            self.img = cv2.flip(self.img,flip_flag)
-
+import piece
 
 if __name__ == "__main__":
     img = cv2.imread("sample.jpeg", cv2.IMREAD_COLOR)
@@ -32,7 +17,7 @@ if __name__ == "__main__":
     piece_row = int(row/p)
     piece_col = int(col/q)
 
-    pieces = [[Piece(piece_row, piece_col,
+    pieces = [[piece.Piece(piece_row, piece_col,
                      img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
                for j in range(q)]
               for i in range(p)]
