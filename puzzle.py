@@ -15,6 +15,9 @@ class Piece:
         cv2.imshow(name,self.img)
         cv2.waitKey(0)
 
+    def flip(self, flip_flag):
+        if flip_flag != 2:
+            self.img = cv2.flip(self.img,flip_flag)
 
 
 if __name__ == "__main__":
@@ -34,7 +37,10 @@ if __name__ == "__main__":
                for j in range(q)]
               for i in range(p)]
 
-    #flip pieces
+    #Flip pieces
+    for i in range(p):
+        for j in range(q):
+            pieces[i][j].flip(random.randint(0,3))
 
 
     #shuffle pieces
