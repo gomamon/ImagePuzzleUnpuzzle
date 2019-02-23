@@ -27,7 +27,9 @@ if __name__ == "__main__":
     #Flip pieces
     for i in range(p):
         for j in range(q):
-            pieces[i][j].flip(random.randint(0,3))
+            flip_flag = random.randint(0, 4)
+            for k in range(flip_flag % 2,int(flip_flag/2),2):
+                pieces[i][j].flip(flip_flag % 2)
 
 
     #shuffle pieces
