@@ -1,9 +1,11 @@
-
 import cv2
 import numpy as np
 import sys
 import random
 import piece
+
+
+
 
 if __name__ == "__main__":
     img = cv2.imread("sample.jpeg", cv2.IMREAD_COLOR)
