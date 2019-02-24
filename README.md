@@ -22,13 +22,13 @@ Execute unpuzzling program with above usage. It will attempt to rearrange puzzle
 In the case of the example, puzzled_image.jpg will be unpuzzled given 4 pieces vertically and 3 pieces horizontally.
 
 ## Running test
-###puzzling
+### puzzling
 ```bash
 python3 unpuzzle.py 4 4
 ```
 ![puzzled_image](./puzzled_image.jpg)
 
-###unpuzzling
+### unpuzzling
 ```bash
 python3 unpuzzle.py 4 4
 ```
