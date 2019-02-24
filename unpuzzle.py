@@ -13,17 +13,17 @@ def get_line_score(img, n, piece_row, piece_col, flag, thres_hold):
         for i in range(piece_col):
             if img[piece_row*n, i] > thres_hold:
                 score += 1
-            if img[piece_row*n-1, i] > thres_hold:
+            elif img[piece_row*n-1, i] > thres_hold:
                 score+=1
-            if img[piece_row*n+1, i] > thres_hold:
+            elif img[piece_row*n+1, i] > thres_hold:
                 score += 1
     else:
         for i in range(piece_row):
             if img[i, piece_col*n] > thres_hold:
                 score += 1
-            if img[i, piece_col*n-1] > thres_hold:
+            elif img[i, piece_col*n-1] > thres_hold:
                 score+=1
-            if img[i, piece_col*n+1] > thres_hold:
+            elif img[i, piece_col*n+1] > thres_hold:
                 score += 1
 
     return score
