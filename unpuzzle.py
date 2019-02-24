@@ -91,7 +91,7 @@ def horizontal_merge(pieces, remainder, row, col, p, q):
     merge_info = []
 
 
-    while num_merged < p:
+    while num_merged < q:
         # Get minimum diff and save information
         min_line_score = -1
 
@@ -100,7 +100,7 @@ def horizontal_merge(pieces, remainder, row, col, p, q):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
                 gray_dst = cv2.cvtColor(merged, cv2.COLOR_BGR2GRAY)
                 for flip_flag_src in range(4):
-                    pieces[src_idx] = cv2.flip(pieces[src_idx], flip_flag_src % 2)
+                    pieces[src_idx] = cv2.flip( pieces[src_idx], flip_flag_src % 2)
 
                     gray_src = cv2.cvtColor(pieces[src_idx], cv2.COLOR_BGR2GRAY)
                     tmp_merged = cv2.hconcat([gray_dst, gray_src])
@@ -111,7 +111,7 @@ def horizontal_merge(pieces, remainder, row, col, p, q):
                         merge_info = [flip_flag_dst, flip_flag_src, src_idx]
                         min_line_score = line_score
 
-        if num_merged < p:
+        if num_merged < q:
             for flip_flag_dst in range(merge_info[0] + 1):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
             for flip_flag_src in range(merge_info[1] + 1):
@@ -146,11 +146,14 @@ if __name__ == '__main__':
     # match vertical images
     remainder = [i for i in range(p*q)]
     vertical_pieces = []
+
     for i in range(q):
         vertical_pieces.append(vertical_merge(pieces, remainder, row, col, p, q))
+
+
     # match horizontal images
     remainder = [i for i in range(q)]
-    unpuzzled_img = unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, col, p, q)
+    unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, col, p, q)
 
 
     #save and show result image
