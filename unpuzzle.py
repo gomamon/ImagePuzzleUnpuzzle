@@ -8,10 +8,7 @@ import piece
 
 def get_line_score(img, n, piece_row, piece_col, flag):
 
-    print(piece_row*n)
     score = 0
-    print(img)
-
     if flag == 0:
         for i in range(piece_col):
             if img[piece_row*n, i] > 30:
@@ -34,9 +31,8 @@ def get_line_score(img, n, piece_row, piece_col, flag):
 
 
 
-def vertical_merge(pieces, remainder, row, col, p, q):
-    piece_row = int(row/p)
-    piece_col = int(col/q)
+def vertical_merge(pieces, remainder, piece_row, piece_col, p, q):
+
 
     merged = pieces[remainder[0]].copy()
     merged = pieces[remainder[0]][:piece_row, :piece_col]
@@ -47,7 +43,7 @@ def vertical_merge(pieces, remainder, row, col, p, q):
 
 
     while num_merged < p:
-        #Get minimum diff and information
+
         min_line_score = -1
 
         for src_idx in remainder:
@@ -79,9 +75,8 @@ def vertical_merge(pieces, remainder, row, col, p, q):
     return merged
 
 
-def horizontal_merge(pieces, remainder, row, col, p, q):
-    piece_row = row
-    piece_col = int(col / q)
+def horizontal_merge(pieces, remainder, piece_row, piece_col, p, q):
+
 
     merged = pieces[remainder[0]].copy()
     merged = pieces[remainder[0]][:piece_row, :piece_col]
@@ -142,18 +137,27 @@ if __name__ == '__main__':
         for j in range(q):
             pieces.append(puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
 
-    # match vertical images
     remainder = [i for i in range(p*q)]
-    vertical_pieces = []
 
-    for i in range(q):
-        vertical_pieces.append(vertical_merge(pieces, remainder, row, col, p, q))
+    if piece_col >= piece_row :
+        # match vertical images
+        vertical_pieces = []
+        for i in range(q):
+            vertical_pieces.append(vertical_merge(pieces, remainder, piece_row, piece_col, p, q))
 
+        # match horizontal images
+        remainder = [i for i in range(q)]
+        unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, piece_col, p, q)
 
-    # match horizontal images
-    remainder = [i for i in range(q)]
-    unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, col, p, q)
+    else:
+        # match horizontal images
+        horizontal_pieces = []
+        for i in range(p):
+            horizontal_pieces.append(horizontal_merge(pieces, remainder, piece_row, piece_col, p, q))
 
+        # match vertical images
+        remainder = [i for i in range(p)]
+        unpuzzled_img = vertical_merge(horizontal_pieces, remainder, piece_row, col, p, q)
 
     #save and show result image
     cv2.imwrite("unpuzzled_image.jpg", unpuzzled_img)
