@@ -1,6 +1,7 @@
 import cv2
 
 class Piece:
+
     def __init__(self, row, col, imgorigin):
         self.row = row
         self.col = col
@@ -12,5 +13,10 @@ class Piece:
         cv2.waitKey(0)
 
     def flip(self, flip_flag):
-        if flip_flag != 2:
-            self.img = cv2.flip(self.img,flip_flag)
+        if flip_flag < 2:
+            self.img = cv2.flip(self.img, flip_flag)
+
+
+
+
+
