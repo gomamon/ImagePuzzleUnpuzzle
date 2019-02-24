@@ -8,11 +8,11 @@ import piece
 
 
 if __name__ == "__main__":
-    img = cv2.imread("sample.jpeg", cv2.IMREAD_COLOR)
+    img = cv2.imread(sys.argv[1], cv2.IMREAD_COLOR)
     row, col, channel = img.shape
 
-    p = int(sys.argv[1])
-    q = int(sys.argv[2])
+    p = int(sys.argv[2])
+    q = int(sys.argv[3])
 
 
     # Split img to pieces
