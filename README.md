@@ -11,7 +11,7 @@ This program is able to puzzle images with random piece flips and rearrange (unp
 ### puzzling
 ```bash
 [usage]: python3 puzzle.py file_name pieces_in_vertical pieces_in_horizontal
-python3 puzzle.py sample.jpeg 4 3
+python3 puzzle.py sample.png 4 3
 ```
 Execute puzzling program with above usage. Result image is generated as puzzled_image.jpg
 In the case of the example, sample.jpeg will be puzzled into 4 pieces vertically and 3 pieces horizontally.
@@ -27,7 +27,7 @@ In the case of the example, puzzled_image.jpg will be unpuzzled given 4 pieces v
 ## Running test
 ### puzzling
 ```bash
-python3 puzzle.py sample2.png 4 4
+python3 puzzle.py sample.png 4 4
 ```
 ![puzzled_image](./puzzled_image.jpg)
 
