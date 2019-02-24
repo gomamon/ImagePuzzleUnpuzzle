@@ -38,8 +38,8 @@ def vertical_merge(pieces, remainder, row, col, p, q):
     piece_row = int(row/p)
     piece_col = int(col/q)
 
-    merged = pieces[remainder[0]].img.copy()
-    merged = pieces[remainder[0]].img[:piece_row, :piece_col]
+    merged = pieces[remainder[0]].copy()
+    merged = pieces[remainder[0]][:piece_row, :piece_col]
 
     remainder.pop(0)
     num_merged = 1
@@ -55,9 +55,9 @@ def vertical_merge(pieces, remainder, row, col, p, q):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
                 gray_dst = cv2.cvtColor(merged, cv2.COLOR_BGR2GRAY)
                 for flip_flag_src in range(4):
-                    pieces[src_idx].flip(flip_flag_src % 2)
+                    pieces[src_idx] = cv2.flip(pieces[src_idx], flip_flag_src % 2)
 
-                    gray_src = cv2.cvtColor(pieces[src_idx].img, cv2.COLOR_BGR2GRAY)
+                    gray_src = cv2.cvtColor(pieces[src_idx], cv2.COLOR_BGR2GRAY)
                     tmp_merged = cv2.vconcat([gray_dst, gray_src])
                     laplacian = cv2.Laplacian(tmp_merged, cv2.CV_8U, ksize=3)
                     line_score = get_line_score(laplacian, num_merged, piece_row, piece_col,0)
@@ -70,8 +70,8 @@ def vertical_merge(pieces, remainder, row, col, p, q):
             for flip_flag_dst in range(merge_info[0]+1):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
             for flip_flag_src in range(merge_info[1]+1):
-                pieces[merge_info[2]].flip(flip_flag_src%2)
-            merged = cv2.vconcat([merged, pieces[merge_info[2]].img])
+                pieces[merge_info[2]] = cv2.flip(pieces[merge_info[2]], flip_flag_src%2)
+            merged = cv2.vconcat([merged, pieces[merge_info[2]]])
 
             remainder.pop(remainder.index(merge_info[2]))
             num_merged += 1
@@ -140,8 +140,7 @@ if __name__ == '__main__':
 
     for i in range(p):
         for j in range(q):
-            pieces.append(piece.Piece(piece_row, piece_col,
-                     puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col]))
+            pieces.append(puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
 
     # match vertical images
     remainder = [i for i in range(p*q)]
