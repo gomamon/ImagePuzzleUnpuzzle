@@ -24,7 +24,7 @@ In the case of the example, puzzled_image.jpg will be unpuzzled given 4 pieces v
 ## Running test
 ### puzzling
 ```bash
-python3 unpuzzle.py 4 4
+python3 puzzle.py sample.jpeg 4 4
 ```
 ![puzzled_image](./puzzled_image.jpg)
 
