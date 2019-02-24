@@ -6,32 +6,31 @@ import piece
 
 
 
-def get_line_score(img, n, piece_row, piece_col, flag):
+def get_line_score(img, n, piece_row, piece_col, flag, thres_hold):
 
     score = 0
     if flag == 0:
         for i in range(piece_col):
-            if img[piece_row*n, i] > 30:
+            if img[piece_row*n, i] > thres_hold:
                 score += 1
-            if img[piece_row*n-1, i] > 30:
+            if img[piece_row*n-1, i] > thres_hold:
                 score+=1
-            if img[piece_row*n+1, i] > 30:
+            if img[piece_row*n+1, i] > thres_hold:
                 score += 1
     else:
         for i in range(piece_row):
-            if img[i, piece_col*n] > 30:
+            if img[i, piece_col*n] > thres_hold:
                 score += 1
-            if img[i, piece_col*n-1] > 30:
+            if img[i, piece_col*n-1] > thres_hold:
                 score+=1
-            if img[i, piece_col*n+1] > 30:
+            if img[i, piece_col*n+1] > thres_hold:
                 score += 1
 
     return score
 
 
 
-
-def vertical_merge(pieces, remainder, piece_row, piece_col, p, q):
+def vertical_merge(pieces, remainder, piece_row, piece_col, p, q, thres_hold):
 
 
     merged = pieces[remainder[0]].copy()
@@ -56,7 +55,7 @@ def vertical_merge(pieces, remainder, piece_row, piece_col, p, q):
                     gray_src = cv2.cvtColor(pieces[src_idx], cv2.COLOR_BGR2GRAY)
                     tmp_merged = cv2.vconcat([gray_dst, gray_src])
                     laplacian = cv2.Laplacian(tmp_merged, cv2.CV_8U, ksize=3)
-                    line_score = get_line_score(laplacian, num_merged, piece_row, piece_col,0)
+                    line_score = get_line_score(laplacian, num_merged, piece_row, piece_col, 0, thres_hold)
 
                     if min_line_score == -1 or min_line_score > line_score:
                         merge_info = [flip_flag_dst, flip_flag_src, src_idx]
@@ -75,7 +74,7 @@ def vertical_merge(pieces, remainder, piece_row, piece_col, p, q):
     return merged
 
 
-def horizontal_merge(pieces, remainder, piece_row, piece_col, p, q):
+def horizontal_merge(pieces, remainder, piece_row, piece_col, p, q, thres_hold):
 
 
     merged = pieces[remainder[0]].copy()
@@ -100,7 +99,7 @@ def horizontal_merge(pieces, remainder, piece_row, piece_col, p, q):
                     gray_src = cv2.cvtColor(pieces[src_idx], cv2.COLOR_BGR2GRAY)
                     tmp_merged = cv2.hconcat([gray_dst, gray_src])
                     laplacian = cv2.Laplacian(tmp_merged, cv2.CV_8U, ksize=3)
-                    line_score = get_line_score(laplacian, num_merged, piece_row, piece_col, 1)
+                    line_score = get_line_score(laplacian, num_merged, piece_row, piece_col, 1, thres_hold)
 
                     if min_line_score == -1 or min_line_score > line_score:
                         merge_info = [flip_flag_dst, flip_flag_src, src_idx]
@@ -122,7 +121,6 @@ def horizontal_merge(pieces, remainder, piece_row, piece_col, p, q):
 if __name__ == '__main__':
 
     puzzled_img = cv2.imread("puzzled_image.jpg", cv2.IMREAD_COLOR)
-    a = puzzled_img
     row, col, channel = puzzled_img.shape
 
     p = int(sys.argv[1])
@@ -136,28 +134,30 @@ if __name__ == '__main__':
     for i in range(p):
         for j in range(q):
             pieces.append(puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
-
     remainder = [i for i in range(p*q)]
+
+    ver_thres_hold = 30
+    hor_thres_hold = 30
 
     if piece_col >= piece_row :
         # match vertical images
         vertical_pieces = []
         for i in range(q):
-            vertical_pieces.append(vertical_merge(pieces, remainder, piece_row, piece_col, p, q))
+            vertical_pieces.append(vertical_merge(pieces, remainder, piece_row, piece_col, p, q, ver_thres_hold))
 
         # match horizontal images
         remainder = [i for i in range(q)]
-        unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, piece_col, p, q)
+        unpuzzled_img = horizontal_merge(vertical_pieces, remainder, piece_row*p, piece_col, p, q, hor_thres_hold)
 
     else:
         # match horizontal images
         horizontal_pieces = []
         for i in range(p):
-            horizontal_pieces.append(horizontal_merge(pieces, remainder, piece_row, piece_col, p, q))
+            horizontal_pieces.append(horizontal_merge(pieces, remainder, piece_row, piece_col, p, q, ver_thres_hold))
 
         # match vertical images
         remainder = [i for i in range(p)]
-        unpuzzled_img = vertical_merge(horizontal_pieces, remainder, piece_row, col, p, q)
+        unpuzzled_img = vertical_merge(horizontal_pieces, remainder, piece_row, piece_col*q, p, q, hor_thres_hold)
 
     #save and show result image
     cv2.imwrite("unpuzzled_image.jpg", unpuzzled_img)
