@@ -5,125 +5,84 @@ import random
 import piece
 
 
-def check_line_col(img, n, piece_row, piece_col):
 
-    #cv2.imshow("laplacian", img)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+def get_color(img, row, col, flag):
+    # <flag::: 0:top, 1:right, 2:bottom, 3:left, 4:all>
 
-    print("HI",piece_row, piece_col)
+    if flag == 0:
+        return [
+            list(img[0, 0]),
+            list(img[0, int(col / 2)]),
+            list(img[0, col-1])
+        ]
 
-    for i in range(piece_row, n*piece_row, piece_row):
-        num_white = 0
-        for j in range(piece_col):
-            if img[i, j] > 200:
-                num_white += 1
-            if img[i+1, j] > 200:
-                num_white += 1
-            if img[i - 1, j] > 200:
-                num_white += 1
-        print("white ", num_white, piece_col, num_white/(piece_col*3))
-        if num_white/(piece_col*3) > 0.065:
-            return False
-    return True
+    if flag == 2:
+        return [
+            list(img[row - 1, 0]),
+            list(img[row - 1, int(col / 2)]),
+            list(img[row - 1, col-1])
+        ]
 
-def check_line_row(img, n, piece_row,piece_col):
+    if flag == 4:
+        return [
+            img[0, 0],
+            img[0, int(col / 2)],
+            img[0, col - 1],
+            img[int(row / 2), col - 1],
+            img[row - 1, col - 1],
+            img[row - 1, int(col / 2)],
+            img[row - 1, 0],
+            img[int(row / 2), 0]
+    ]
 
-    for i in range(piece_col, n*piece_col, piece_col):
-        num_white = 0
-        for j in range(piece_row):
-            if img[j, i] > 200:
-                num_white += 1
-            if img[j, i+1] > 200:
-                num_white += 1
-            if img[j, i-1] > 200:
-                num_white += 1
-        print("white ", num_white, piece_col, num_white/(piece_col*3))
-        if num_white/(piece_col*3) > 0.065:
-            return False
-    return True
+def get_color_diff(dst, src):
+    diff = 0
+    for i in range(3):
+        for j in range(3):
+            diff += int(dst[i][j]) - int(src[i][j])
+        diff /= 3
+    diff /= 3
+    return abs(diff)
 
-def match_col(pieces, unchecked, row, col, p, q):
+def vertical_merge(pieces, remainder, row, col, p, q):
     piece_row = int(row/p)
     piece_col = int(col/q)
 
-    completed = pieces[unchecked[0][0]][unchecked[0][1]].img.copy()
-    completed = pieces[unchecked[0][0]][unchecked[0][1]].img[:piece_row, :piece_col]
-    unchecked.pop(0)
-    num_completed = 1
+    merged = pieces[remainder[0]].img.copy()
+    merged = pieces[remainder[0]].img[:piece_row, :piece_col]
 
-    i = 0
-    while i < len(unchecked) and num_completed < p:
-        break_flag = False
-        print(unchecked)
-        i += 1
-
-        for j in unchecked:
-            for k in range(4):
-                completed = cv2.flip(completed, k%2)
-
-                merged = cv2.vconcat([completed, pieces[j[0]][j[1]].img])
-                gray = cv2.cvtColor(merged, cv2.COLOR_BGR2GRAY)
-                laplacian = cv2.Laplacian(gray, cv2.CV_8U, ksize=3)
-
-                if check_line_col(laplacian, num_completed+1, piece_row, piece_col) == True:
-                    num_completed += 1
-                    print("hihi")
-                    completed = merged.copy()
-                    completed = merged[:num_completed*piece_row, :piece_col]
-
-                    unchecked.pop(unchecked.index(j))
-                    break_flag = True
-                    i = 0
-                    if num_completed == p:
-                        cv2.imshow("completed", completed)
-                        cv2.waitKey(0)
-                        cv2.destroyAllWindows()
-                        return completed
-                    break
-            if break_flag:
-                break
+    remainder.pop(0)
+    num_merged = 1
+    merge_info = []
+    min_diff = 98765
+    bottom_flag = 0
 
 
-def match_row(cols, unchecked, row, col, p, q):
-    piece_row = int(row/p)
-    piece_col = int(col/q)
+    while num_merged < p:
+        #Get minimum diff and information
+        min_diff = 98765
 
-    completed = cols[unchecked[0]].copy()
-    completed = cols[unchecked[0]][:piece_row, :piece_col]
-    unchecked.pop(0)
-    num_completed = 1
+        for src_idx in remainder:
+            for flip_flag_dst in range(4):
+                merged = cv2.flip(merged, flip_flag_dst % 2)
+                for flip_flag_src in range(2):
+                    pieces[src_idx].flip(0)
+                    diff = get_color_diff(get_color(merged, piece_row * num_merged, piece_col, 2)
+                                          , get_color( pieces[src_idx].img , piece_row, piece_col, 0))
+                    if min_diff > diff:
+                        merge_info = [flip_flag_dst+1, flip_flag_src+1, src_idx]
+                        min_diff = diff
 
-    i = 0
-    while i < len(unchecked) and num_completed < p:
-        break_flag = False
-        print(unchecked)
-        i += 1
+        if min_diff < 98765 and num_merged < p:
+            for flip_flag_dst in range(merge_info[0]):
+                merged = cv2.flip(merged, flip_flag_dst % 2)
+            for flip_flag_src in range(merge_info[1]):
+                pieces[merge_info[2]].flip(0)
+            merged = cv2.vconcat([merged, pieces[merge_info[2]].img])
+            remainder.pop(remainder.index(merge_info[2]))
+            num_merged += 1
 
-        for j in unchecked:
-            for k in range(4):
-                completed = cv2.flip(completed, k%2)
-                merged = cv2.hconcat([completed, pieces[j[0]]])
-                gray = cv2.cvtColor(merged, cv2.COLOR_BGR2GRAY)
-                laplacian = cv2.Laplacian(gray, cv2.CV_8U, ksize=3)
-
-                if check_line_row(laplacian, num_completed+1, row, piece_col) == True:
-                    num_completed += 1
-                    print("hihi")
-                    completed = merged.copy()
-                    completed = merged[:num_completed*piece_row, :piece_col]
-
-                    unchecked.pop(unchecked.index(j))
-                    break_flag = True
-                    i = 0
-                    if num_completed == p:
-                        cv2.imshow("completed", completed)
-                        cv2.waitKey(0)
-                        cv2.destroyAllWindows()
-                        return completed
-                    break
-            if break_flag:
-                break
+    return merged
 
 
 
@@ -140,57 +99,24 @@ if __name__ == '__main__':
     # Split img to pieces
     piece_row = int(row/p)
     piece_col = int(col/q)
+    pieces = []
 
     #match column images
-    pieces = [[piece.Piece(piece_row, piece_col,
-                     puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col])
-               for j in range(q)]
-              for i in range(p)]
-
-    unchecked = []
-
     for i in range(p):
         for j in range(q):
-            unchecked.append((i, j))
-    print(unchecked)
+            pieces.append(piece.Piece(piece_row, piece_col,
+                     puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col]))
 
-    #match all images
-    completed_col = []
-    for i in range(p):
-        completed_col.append(match_col(pieces, unchecked, row, col, p, q))
-        print(unchecked)
-        print(completed_col)
+    remainder = [i for i in range(p*q)]
 
-    unchecked = []
     for i in range(q):
-        unchecked.append(q)
+        cv2.imshow("laplacian", vertical_merge(pieces,remainder,row,col,p,q))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 
     #cv2.imshow("completed!", match_row(completed_col, unchecked, row, col, p, q))
 
 
-
-
-    # Merge to puzzled pieces
-    '''
-    unpuzzled_image = np.zeros((row, col, 3), np.uint8)
-    for i in range(p*q):
-        offset_row = piece_row*int(i/q)
-        offset_col = piece_col*int(i%q)
-        unpuzzled_image[offset_row:offset_row+piece_row, offset_col:offset_col+piece_col] = \
-            pieces[int(i/q)][i%q].img'''
-
-
-#    gray = cv2.cvtColor(puzzled_img, cv2.COLOR_BGR2GRAY)
-#    laplacian = cv2.Laplacian(gray, cv2.CV_8U, ksize=3)
-
-
-#   print(laplacian[piece_row, piece_col])
-
-
-
- #   cv2.imshow("laplacian", laplacian)
-
-#    cv2.imwrite("unpuzzled_image.jpg",puzzled_image)
-#    cv2.imshow("image", unpuzzled_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
