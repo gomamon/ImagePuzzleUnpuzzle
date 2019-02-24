@@ -37,12 +37,13 @@ def get_color(img, row, col, flag):
 
 def get_color_diff(dst, src):
     diff = 0
+    tot_diff = 0
     for i in range(3):
         for j in range(3):
-            diff += int(dst[i][j]) - int(src[i][j])
+            diff += abs(int(dst[i][j]) - int(src[i][j]))
         diff /= 3
     diff /= 3
-    return abs(diff)
+    return diff
 
 def vertical_merge(pieces, remainder, row, col, p, q):
     piece_row = int(row/p)
@@ -67,16 +68,16 @@ def vertical_merge(pieces, remainder, row, col, p, q):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
                 for flip_flag_src in range(2):
                     pieces[src_idx].flip(0)
-                    diff = get_color_diff(get_color(merged, piece_row * num_merged, piece_col, 2)
-                                          , get_color( pieces[src_idx].img , piece_row, piece_col, 0))
+                    diff = get_color_diff(get_color(merged, piece_row*num_merged, piece_col, 2)
+                                          , get_color(pieces[src_idx].img, piece_row, piece_col, 0))
                     if min_diff > diff:
-                        merge_info = [flip_flag_dst+1, flip_flag_src+1, src_idx]
+                        merge_info = [flip_flag_dst, flip_flag_src, src_idx]
                         min_diff = diff
 
         if min_diff < 98765 and num_merged < p:
-            for flip_flag_dst in range(merge_info[0]):
+            for flip_flag_dst in range(merge_info[0]+1):
                 merged = cv2.flip(merged, flip_flag_dst % 2)
-            for flip_flag_src in range(merge_info[1]):
+            for flip_flag_src in range(merge_info[1]+1):
                 pieces[merge_info[2]].flip(0)
             merged = cv2.vconcat([merged, pieces[merge_info[2]].img])
             remainder.pop(remainder.index(merge_info[2]))
