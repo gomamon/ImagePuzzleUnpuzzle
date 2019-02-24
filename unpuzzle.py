@@ -138,22 +138,23 @@ if __name__ == '__main__':
     piece_col = int(col/q)
     pieces = []
 
-    #match vertical images
     for i in range(p):
         for j in range(q):
             pieces.append(piece.Piece(piece_row, piece_col,
                      puzzled_img[i*piece_row:i*piece_row+piece_row, j*piece_col:j*piece_col+piece_col]))
 
+    # match vertical images
     remainder = [i for i in range(p*q)]
     vertical_pieces = []
     for i in range(q):
         vertical_pieces.append(vertical_merge(pieces, remainder, row, col, p, q))
-        cv2.imshow("laplacian", vertical_pieces[0])
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
+    # match horizontal images
     remainder = [i for i in range(q)]
-    cv2.imshow("completed!", horizontal_merge(vertical_pieces, remainder, row, col, p, q))
+    unpuzzled_img = unpuzzled_img = horizontal_merge(vertical_pieces, remainder, row, col, p, q)
 
+
+    #save and show result image
+    cv2.imwrite("unpuzzled_image.jpg", unpuzzled_img)
+    cv2.imshow("unpuzzled_img", unpuzzled_img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
